@@ -1,3 +1,7 @@
+> ⚠️ **Project Status: In Development**
+>
+> This Smart Wallet app is still a **work in progress**. Core features are being implemented and polished. Expect changes, improvements, and additions!
+
 # 💳 Smart Wallet Web App
 
 A **Smart Wallet** is a browser-based financial management application that allows users to register, manage wallets, perform transactions, subscribe to plans, and track their financial activity through a rich UI powered by Thymeleaf and Spring Boot.
