@@ -1,13 +1,16 @@
 package app.user.service;
 
 import app.exception.DomainException;
+import app.subscription.model.Subscription;
 import app.subscription.service.SubscriptionService;
 import app.user.model.Role;
 import app.user.model.User;
 import app.user.repository.UserRepository;
+import app.wallet.model.Wallet;
 import app.wallet.service.WalletService;
 import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
+import app.web.dto.UserEditRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,13 +59,28 @@ public class UserService {
         }
 
         User user = userRepository.save(initializeUser(registerRequest));
-        subscriptionService.createDefaultSubscription(user);
-        walletService.createNewWallet(user);
+        
+        Subscription defaultSubscription = subscriptionService.createDefaultSubscription(user);
+        user.setSubscriptions(List.of(defaultSubscription));
+
+        Wallet standardWallet = walletService.createNewWallet(user);
+        user.setWallets(List.of(standardWallet));
 
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(
                 user.getUsername(), user.getId()
         ));
         return user;
+    }
+
+    public void editUserDetails(UUID id, UserEditRequest userEditRequest) {
+        User user = getById(id);
+
+        user.setFirstName(userEditRequest.getFirstName());
+        user.setLastName(userEditRequest.getLastName());
+        user.setEmail(userEditRequest.getEmail());
+        user.setProfilePicture(userEditRequest.getProfilePicture());
+
+        userRepository.save(user);
     }
 
     private User initializeUser(RegisterRequest registerRequest) {

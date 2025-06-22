@@ -5,6 +5,8 @@ import app.web.dto.RegisterRequest;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class UserInit implements CommandLineRunner {
     private final UserService userService;

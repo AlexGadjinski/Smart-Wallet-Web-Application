@@ -100,7 +100,7 @@
     <div class="single-section-box home-profile-information">
       <div class="profile-header">
         <img th:src="${#strings.isEmpty(user.profilePicture) ? 'https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png' : user.profilePicture}" alt="Profile Picture" class="profile-avatar">
-        <h2 class="profile-name" th:name="${user.username}"></h2>
+        <h2 class="profile-name" th:text="${user.username}"></h2>
         <div class="profile-status-role-container">
           <p th:if="${user.isActive()}" class="active-profile">ACTIVE</p>
           <p th:if="${!user.isActive()}" class="inactive-profile">INACTIVE</p>
@@ -210,6 +210,6 @@
     </div>
   </div>
 </main>
-<div class="footer"><p>© 2025 Smart Wallet. All rights reserved.</p></div>
+<th:block th:insert="fragments/footer :: footer"></th:block>
 </body>
 </html>

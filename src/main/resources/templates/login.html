@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"><head>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -23,15 +23,17 @@
       </a>
     </div>
 
-    <form class="form">
+    <form class="form" th:action="@{/login}" th:method="POST" th:object="${loginRequest}">
 
       <h3>Login Here</h3>
 
       <label for="username">Username</label>
-      <input type="text" placeholder="Username" id="username">
+      <input type="text" placeholder="Username" id="username" th:field="*{username}" required>
+      <p class="alert-warning" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
 
       <label for="password">Password</label>
-      <input type="password" placeholder="Password" id="password">
+      <input type="password" placeholder="Password" id="password" th:field="*{password}" required>
+      <p class="alert-warning" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
 
       <button type="submit">Log In</button>
 
@@ -41,6 +43,6 @@
 
   </section>
 </main>
-<div class="footer"><p>© 2025 Smart Wallet. All rights reserved.</p></div>
+<th:block th:insert="fragments/footer :: footer"></th:block>
 </body>
 </html>

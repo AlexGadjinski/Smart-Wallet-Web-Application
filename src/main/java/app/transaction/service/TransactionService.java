@@ -1,5 +1,6 @@
 package app.transaction.service;
 
+import app.exception.DomainException;
 import app.transaction.model.Transaction;
 import app.transaction.model.TransactionStatus;
 import app.transaction.model.TransactionType;
@@ -23,7 +24,6 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-
     public Transaction createNewTransaction(User owner, String sender, String receiver, BigDecimal amount,
                                             BigDecimal balanceLeft, Currency currency, TransactionType type,
                                             TransactionStatus status, String description, String failureReason) {
@@ -40,10 +40,16 @@ public class TransactionService {
                 .failureReason(failureReason)
                 .createdOn(LocalDateTime.now())
                 .build();
+
         return transactionRepository.save(transaction);
     }
 
     public List<Transaction> getAllByOwnerId(UUID ownerId) {
         return transactionRepository.findAllByOwnerIdOrderByCreatedOnDesc(ownerId);
+    }
+
+    public Transaction getById(UUID id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new DomainException("Transaction with id [%s] does not exist.".formatted(id)));
     }
 }

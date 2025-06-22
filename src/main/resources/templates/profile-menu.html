@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"><head>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -113,19 +113,23 @@
         </div>
       </div>
 
-      <form class="form">
+      <form class="form" th:action="@{'/users/' + ${user.id} + '/profile'}" th:method="PUT" th:object="${userEditRequest}">
 
         <label for="firstName">First Name</label>
-        <input type="text" id="firstName" placeholder="First Name">
+        <input type="text" id="firstName" placeholder="First Name" th:field="*{firstName}">
+        <p class="alert-warning" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></p>
 
         <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" placeholder="Last Name">
+        <input type="text" id="lastName" placeholder="Last Name" th:field="*{lastName}">
+        <p class="alert-warning" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></p>
 
         <label for="email">Email</label>
-        <input type="text" id="email" placeholder="Email Address">
+        <input type="text" id="email" placeholder="Email Address" th:field="*{email}">
+        <p class="alert-warning" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
 
         <label for="profilePicture">Profile Picture URL</label>
-        <input type="text" id="profilePicture" placeholder="Image Link">
+        <input type="text" id="profilePicture" placeholder="Image Link" th:field="*{profilePicture}">
+        <p class="alert-warning" th:if="${#fields.hasErrors('profilePicture')}" th:errors="*{profilePicture}"></p>
 
         <button class="profile-actions-button">
           <p>Save</p>
@@ -139,7 +143,7 @@
   </div>
 </main>
 
-<div class="footer"><p>© 2025 Smart Wallet. All rights reserved.</p></div>
+<th:block th:insert="fragments/footer :: footer"></th:block>
 
 </body>
 </html>
