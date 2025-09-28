@@ -12,6 +12,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class TransferRequest {
+
     @NotNull
     private UUID fromWalletId;
 

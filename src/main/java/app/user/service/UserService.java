@@ -12,6 +12,8 @@ import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
 import app.web.dto.UserEditRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,7 @@ public class UserService {
         return user;
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     @Transactional
     public User register(RegisterRequest registerRequest) {
         Optional<User> optionalUser = userRepository.findByUsername(registerRequest.getUsername());
@@ -72,6 +75,7 @@ public class UserService {
         return user;
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     public void editUserDetails(UUID id, UserEditRequest userEditRequest) {
         User user = getById(id);
 
@@ -97,6 +101,7 @@ public class UserService {
                 .build();
     }
 
+    @Cacheable("users")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -104,5 +109,21 @@ public class UserService {
     public User getById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new DomainException("User with id [%s] does not exist.".formatted(id)));
+    }
+
+    @CacheEvict(value = "users", allEntries = true)
+    public void switchStatus(UUID userId) {
+        User user = getById(userId);
+        user.setActive(!user.isActive());
+
+        userRepository.save(user);
+    }
+
+    @CacheEvict(value = "users", allEntries = true)
+    public void switchRole(UUID userId) {
+        User user = getById(userId);
+        user.setRole(user.getRole() == Role.USER ? Role.ADMIN : Role.USER);
+
+        userRepository.save(user);
     }
 }

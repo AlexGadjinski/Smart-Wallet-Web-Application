@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.URL;
 @Data
 @Builder
 public class UserEditRequest {
+
     @Size(max = 20, message = "First name can't have more than 20 symbols")
     private String firstName;
 

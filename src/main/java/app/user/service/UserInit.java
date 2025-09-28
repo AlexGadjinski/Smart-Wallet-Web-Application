@@ -5,8 +5,6 @@ import app.web.dto.RegisterRequest;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 public class UserInit implements CommandLineRunner {
     private final UserService userService;
@@ -16,7 +14,7 @@ public class UserInit implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (!userService.getAllUsers().isEmpty()) {
             return;
         }

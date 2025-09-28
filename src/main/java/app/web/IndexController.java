@@ -4,6 +4,7 @@ import app.user.model.User;
 import app.user.service.UserService;
 import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -26,52 +27,69 @@ public class IndexController {
         return "index";
     }
 
-    @GetMapping("/login")
-    public ModelAndView getLoginPage() {
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("login");
-        modelAndView.addObject("loginRequest", new LoginRequest());
-
-        return modelAndView;
-    }
-
-    @PostMapping("/login")
-    public String loginUser(@Valid LoginRequest loginRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "login";
-        }
-
-        userService.login(loginRequest);
-        return "redirect:/home";
-    }
-
     @GetMapping("/register")
     public ModelAndView getRegisterPage() {
+
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("register");
-        modelAndView.addObject("registerRequest", new RegisterRequest());
+        modelAndView.addObject("registerRequest", RegisterRequest.builder().build());
 
         return modelAndView;
     }
 
     @PostMapping("/register")
     public String registerNewUser(@Valid RegisterRequest registerRequest, BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             return "register";
         }
 
         userService.register(registerRequest);
+
+        return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public ModelAndView getLoginPage() {
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("login");
+        modelAndView.addObject("loginRequest", LoginRequest.builder().build());
+
+        return modelAndView;
+    }
+
+    // Autowiring of HttpSession session -> създава се нова сесия за тази заявка (ако няма съществуваща вече)
+    @PostMapping("/login")
+    public String loginUser(@Valid LoginRequest loginRequest, BindingResult bindingResult, HttpSession session) {
+
+        if (bindingResult.hasErrors()) {
+            return "login";
+        }
+
+        User loggedInUser = userService.login(loginRequest);
+        session.setAttribute("user_id", loggedInUser.getId());
+
         return "redirect:/home";
     }
 
     @GetMapping("/home")
-    public ModelAndView getHomePage() {
-        User user = userService.getById(UUID.fromString("7f8806ca-2ab0-4b03-90cd-ff67d391cfc2"));
+    public ModelAndView getHomePage(HttpSession session) {
+
+        UUID userId = (UUID) session.getAttribute("user_id");
+        User user = userService.getById(userId);
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("home");
         modelAndView.addObject("user", user);
 
         return modelAndView;
+    }
+
+    @GetMapping("/logout")
+    public String getLogoutPage(HttpSession session) {
+        session.invalidate();
+
+        return "redirect:/";
     }
 }

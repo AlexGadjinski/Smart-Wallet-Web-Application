@@ -9,8 +9,10 @@ import app.user.model.User;
 import app.wallet.model.Wallet;
 import app.wallet.model.WalletStatus;
 import app.wallet.repository.WalletRepository;
+import app.web.dto.PaymentNotificationEvent;
 import app.web.dto.TransferRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +28,12 @@ public class WalletService {
     private static final String SMART_WALLET_LTD = "Smart Wallet Ltd";
     private final WalletRepository walletRepository;
     private final TransactionService transactionService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public WalletService(WalletRepository walletRepository, TransactionService transactionService) {
+    public WalletService(WalletRepository walletRepository, TransactionService transactionService, ApplicationEventPublisher eventPublisher) {
         this.walletRepository = walletRepository;
         this.transactionService = transactionService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -108,6 +112,15 @@ public class WalletService {
         wallet.setBalance(wallet.getBalance().subtract(amount));
         wallet.setUpdatedOn(LocalDateTime.now());
         walletRepository.save(wallet);
+
+        PaymentNotificationEvent event = PaymentNotificationEvent.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .amount(amount)
+                .paymentTime(LocalDateTime.now())
+                .build();
+        eventPublisher.publishEvent(event);
+
         return transactionService.createNewTransaction(
                 user, wallet.getId().toString(), SMART_WALLET_LTD,
                 amount, wallet.getBalance(), wallet.getCurrency(), TransactionType.WITHDRAWAL,
