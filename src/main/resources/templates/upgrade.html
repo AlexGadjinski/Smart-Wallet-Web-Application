@@ -151,11 +151,11 @@
         <p>0.00</p>
         <p>yearly price</p>
       </div>
-      <form class="form" th:action="@{'/subscriptions?subscription-type=DEFAULT'}" method="POST" th:object="${upgradeRequest}">
+      <form class="form" th:action="@{'/subscriptions?subscription-type=DEFAULT'}" th:method="POST" th:object="${upgradeRequest}">
         <label>Choose period</label>
-        <select name="subscriptionPeriod" th:field="*{getSubscriptionPeriod}">
+        <select name="subscriptionPeriod" th:field="*{subscriptionPeriod}">
           <option th:each="period : ${T(app.subscription.model.SubscriptionPeriod).values()}" th:value="${period}"
-                  th:text="${#strings.capitalize(#strings.toLowerCase(period))}"></option>
+                  th:text="${#strings.capitalize(#strings.toLowerCase(period.name()))}"></option>
         </select>
         <label>Choose wallet to pay with</label>
         <select name="walletId" th:field="*{walletId}">
@@ -209,11 +209,11 @@
         <p>199.99</p>
         <p>yearly price</p>
       </div>
-      <form class="form" th:action="@{'/subscriptions?subscription-type=PREMIUM'}" method="POST" th:object="${upgradeRequest}">
+      <form class="form" th:action="@{'/subscriptions?subscription-type=PREMIUM'}" th:method="POST" th:object="${upgradeRequest}">
         <label>Choose period</label>
-        <select name="subscriptionPeriod" th:field="*{getSubscriptionPeriod}">
+        <select name="subscriptionPeriod" th:field="*{subscriptionPeriod}">
           <option th:each="period : ${T(app.subscription.model.SubscriptionPeriod).values()}" th:value="${period}"
-                  th:text="${#strings.capitalize(#strings.toLowerCase(period))}"></option>
+                  th:text="${#strings.capitalize(#strings.toLowerCase(period.name()))}"></option>
         </select>
         <label>Choose wallet to pay with</label>
         <select name="walletId" th:field="*{walletId}">
@@ -228,7 +228,7 @@
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
           </svg>
         </button>
-        <div th:if="${user.subscriptions.get(0).type.name() == 'PREMIUM'}" class="default-label-box default-label-box">
+        <div th:if="${user.subscriptions.get(0).type.name() == 'PREMIUM'}" class="default-label-box premium-label">
           <p>Your current subscription</p>
         </div>
       </form>
@@ -266,11 +266,11 @@
         <p>499.99</p>
         <p>yearly price</p>
       </div>
-      <form class="form" th:action="@{'/subscriptions?subscription-type=ULTIMATE'}" method="POST" th:object="${upgradeRequest}">
+      <form class="form" th:action="@{'/subscriptions?subscription-type=ULTIMATE'}" th:method="POST" th:object="${upgradeRequest}">
         <label>Choose period</label>
-        <select name="subscriptionPeriod" th:field="*{getSubscriptionPeriod}">
+        <select name="subscriptionPeriod" th:field="*{subscriptionPeriod}">
           <option th:each="period : ${T(app.subscription.model.SubscriptionPeriod).values()}" th:value="${period}"
-                  th:text="${#strings.capitalize(#strings.toLowerCase(period))}"></option>
+                  th:text="${#strings.capitalize(#strings.toLowerCase(period.name()))}"></option>
         </select>
         <label>Choose wallet to pay with</label>
         <select name="walletId" th:field="*{walletId}">
@@ -285,7 +285,7 @@
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
           </svg>
         </button>
-        <div th:if="${user.subscriptions.get(0).type.name() == 'ULTIMATE'}" class="default-label-box default-label-box">
+        <div th:if="${user.subscriptions.get(0).type.name() == 'ULTIMATE'}" class="default-label-box ultimate-label">
           <p>Your current subscription</p>
         </div>
       </form>
