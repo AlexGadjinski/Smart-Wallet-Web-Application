@@ -9,6 +9,6 @@ public class HelloWorldScheduler {
     // Scheduled Job / Cron Job
     @Scheduled(fixedDelay = 10000)
     public void sayHelloEvery10Seconds() {
-        System.out.println("Hello World!!!");
+//        System.out.println("Hello World!!!");
     }
 }

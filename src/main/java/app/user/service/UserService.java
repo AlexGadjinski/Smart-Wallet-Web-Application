@@ -1,6 +1,7 @@
 package app.user.service;
 
 import app.exception.DomainException;
+import app.security.AuthenticationMetadata;
 import app.subscription.model.Subscription;
 import app.subscription.service.SubscriptionService;
 import app.user.model.Role;
@@ -8,12 +9,14 @@ import app.user.model.User;
 import app.user.repository.UserRepository;
 import app.wallet.model.Wallet;
 import app.wallet.service.WalletService;
-import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
 import app.web.dto.UserEditRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +28,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final SubscriptionService subscriptionService;
     private final WalletService walletService;
@@ -37,20 +40,6 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.subscriptionService = subscriptionService;
         this.walletService = walletService;
-    }
-
-    public User login(LoginRequest loginRequest) {
-        Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
-        if (optionalUser.isEmpty()) {
-            throw new DomainException("Username or password is incorrect.");
-        }
-
-        User user = optionalUser.get();
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new DomainException("Username or password is incorrect.");
-        }
-
-        return user;
     }
 
     @CacheEvict(value = "users", allEntries = true)
@@ -66,7 +55,7 @@ public class UserService {
         Subscription defaultSubscription = subscriptionService.createDefaultSubscription(user);
         user.setSubscriptions(List.of(defaultSubscription));
 
-        Wallet standardWallet = walletService.createNewWallet(user);
+        Wallet standardWallet = walletService.initializeFirstWallet(user);
         user.setWallets(List.of(standardWallet));
 
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(
@@ -125,5 +114,14 @@ public class UserService {
         user.setRole(user.getRole() == Role.USER ? Role.ADMIN : Role.USER);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new DomainException("User with this username does not exist."));
+
+        return new AuthenticationMetadata(user.getId(), username, user.getPassword(), user.getRole(), user.isActive());
     }
 }

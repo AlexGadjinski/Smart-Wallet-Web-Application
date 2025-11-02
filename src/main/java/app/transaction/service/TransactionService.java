@@ -6,6 +6,7 @@ import app.transaction.model.TransactionStatus;
 import app.transaction.model.TransactionType;
 import app.transaction.repository.TransactionRepository;
 import app.user.model.User;
+import app.wallet.model.Wallet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -51,5 +52,12 @@ public class TransactionService {
     public Transaction getById(UUID id) {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new DomainException("Transaction with id [%s] does not exist.".formatted(id)));
+    }
+
+    public List<Transaction> getAllTransactionsByWallet(Wallet wallet) {
+
+        String walletId = wallet.getId().toString();
+
+        return transactionRepository.findAllBySenderOrReceiverOrderByCreatedOnDesc(walletId, walletId);
     }
 }
