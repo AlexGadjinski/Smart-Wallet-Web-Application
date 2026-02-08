@@ -151,55 +151,62 @@
             <div class="details-section">
                 <div class="details-section-container">
                     <strong>Notification type: </strong>
-                    <p>Email</p>
+                    <p th:text="${#strings.capitalize(#strings.toLowerCase(notificationPreference.type))}"></p>
                 </div>
             </div>
 
             <div class="details-section">
                 <div class="details-section-container">
                     <strong>Source: </strong>
-                    <p>vik.aleksandrov@gmail.com</p>
+                    <p th:text="${#strings.isEmpty(notificationPreference.contactInfo) ? 'Edit your profile and add email' : notificationPreference.contactInfo}"></p>
                 </div>
             </div>
 
             <div class="details-section">
                 <div class="details-section-container">
                     <strong>Non-failed notifications: </strong>
-                    <p>16</p>
+                    <p th:text="${succeededNotificationsCount}"></p>
                 </div>
             </div>
 
             <div class="details-section">
                 <div class="details-section-container">
                     <strong>Failed notifications: </strong>
-                    <p>2</p>
+                    <p th:text="${failedNotificationsCount}"></p>
                 </div>
             </div>
 
             <div class="details-section">
                 <div class="details-section-container">
                     <strong>Notification state: </strong>
-                    <p class="enabled-notification-status">ENABLED</p>
-                    <p class="disabled-notification-status">DISABLED</p>
+                    <p th:if="${notificationPreference.notificationEnabled}" class="enabled-notification-status">ENABLED</p>
+                    <p th:unless="${notificationPreference.notificationEnabled}" class="disabled-notification-status">DISABLED</p>
                 </div>
             </div>
 
             <p>Change State:</p>
+
             <div class="allowed-notification-actions">
-                <button class="profile-actions-button disable-notifications">
-                    <p>Disable Notifications</p>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                              stroke-linejoin="round"></path>
-                    </svg>
-                </button>
-                <button class="profile-actions-button enable-notifications">
-                    <p>Enable Notifications</p>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                              stroke-linejoin="round"></path>
-                    </svg>
-                </button>
+                <form th:action="@{'/notifications/preferences?enabled=false'}" th:method="POST" th:if="${notificationPreference.notificationEnabled}">
+                    <input type="hidden" name="_method" value="PATCH"/>
+                    <button class="profile-actions-button disable-notifications">
+                        <p>Disable Notifications</p>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                  stroke-linejoin="round"></path>
+                        </svg>
+                    </button>
+                </form>
+                <form th:action="@{'/notifications/preferences?enabled=true'}" th:method="POST" th:unless="${notificationPreference.notificationEnabled}">
+                    <input type="hidden" name="_method" value="PATCH"/>
+                    <button class="profile-actions-button enable-notifications">
+                        <p>Enable Notifications</p>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                  stroke-linejoin="round"></path>
+                        </svg>
+                    </button>
+                </form>
             </div>
 
             <p>General Actions:</p>
@@ -227,7 +234,7 @@
             <h2>Notification History</h2>
             <p>Your last 5 notifications from us:</p>
 
-            <table class="styled-table">
+            <table th:unless="${#lists.isEmpty(notifications)}" class="styled-table">
                 <thead>
                 <tr>
                     <th>Subject</th>
@@ -237,67 +244,36 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>Renewal for plan</td>
-                    <td>12 Jan 2024</td>
-                    <td><span class="status succeeded">Succeeded</span></td>
+                <tr th:each="notification : ${notifications}">
+                    <td th:text="${notification.subject}"></td>
+                    <td th:text="${#temporals.format(notification.createdOn, 'dd MMM yyyy')}">12 Jan 2024</td>
+                    <td th:if="${notification.status == 'SUCCEEDED'}"><span class="status succeeded">Succeeded</span></td>
+                    <td th:if="${notification.status == 'FAILED'}"><span class="status failed">Failed</span></td>
                     <td>
-                        <div class="default-label-box"><p>Email</p></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Unpaid taxes</td>
-                    <td>16 Feb 2024</td>
-                    <td><span class="status failed">Failed</span></td>
-                    <td>
-                        <div class="default-label-box"><p>Email</p></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Purchased product</td>
-                    <td>12 Jan 2024</td>
-                    <td><span class="status succeeded">Succeeded</span></td>
-                    <td>
-                        <div class="default-label-box"><p>Email</p></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Money Transfer</td>
-                    <td>18 Jan 2024</td>
-                    <td><span class="status succeeded">Succeeded</span></td>
-                    <td>
-                        <div class="default-label-box"><p>Email</p></div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Money Transfer</td>
-                    <td>11 Jan 2024</td>
-                    <td><span class="status succeeded">Succeeded</span></td>
-                    <td>
-                        <div class="default-label-box"><p>Email</p></div>
+                        <div th:text="${notification.type}" class="default-label-box"><p>Email</p></div>
                     </td>
                 </tr>
                 </tbody>
             </table>
 <!--            THIS TABLE WILL BE DISPLAYED WHEN THERE ARE NO NOTIFICATIONS-->
-<!--            <table class="styled-table">-->
-<!--                <thead>-->
-<!--                <tr>-->
-<!--                    <th>Subject</th>-->
-<!--                    <th>Date</th>-->
-<!--                    <th>Status</th>-->
-<!--                    <th>Type</th>-->
-<!--                           </tr>-->
-<!--                </thead>-->
-<!--                <tbody>-->
-<!--                <tr>-->
-<!--                    <td>-</td>-->
-<!--                    <td>-</td>-->
-<!--                    <td>-</td>-->
-<!--                    <td>-</td>-->
-<!--                </tr>-->
-<!--                </tbody>-->
-<!--            </table>-->
+            <table th:if="${#lists.isEmpty(notifications)}" class="styled-table">
+                <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Type</th>
+                           </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                </tbody>
+            </table>
 
             <p class="small-informative-text-bottom">Every record in this table is equal to 1 notification of a certain type.</p>
         </div>

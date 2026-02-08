@@ -1,6 +1,7 @@
 package app.user.service;
 
 import app.exception.DomainException;
+import app.notification.service.NotificationService;
 import app.security.AuthenticationMetadata;
 import app.subscription.model.Subscription;
 import app.subscription.service.SubscriptionService;
@@ -33,13 +34,15 @@ public class UserService implements UserDetailsService {
     private final SubscriptionService subscriptionService;
     private final WalletService walletService;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       SubscriptionService subscriptionService, WalletService walletService) {
+                       SubscriptionService subscriptionService, WalletService walletService, NotificationService notificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subscriptionService = subscriptionService;
         this.walletService = walletService;
+        this.notificationService = notificationService;
     }
 
     @CacheEvict(value = "users", allEntries = true)
@@ -58,6 +61,9 @@ public class UserService implements UserDetailsService {
         Wallet standardWallet = walletService.initializeFirstWallet(user);
         user.setWallets(List.of(standardWallet));
 
+        // Persist new notification preference with isEnabled = false
+        notificationService.saveNotificationPreference(user.getId(), false, null);
+
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(
                 user.getUsername(), user.getId()
         ));
@@ -65,8 +71,14 @@ public class UserService implements UserDetailsService {
     }
 
     @CacheEvict(value = "users", allEntries = true)
-    public void editUserDetails(UUID id, UserEditRequest userEditRequest) {
-        User user = getById(id);
+    public void editUserDetails(UUID userId, UserEditRequest userEditRequest) {
+        User user = getById(userId);
+
+        if (user.getEmail() != null && userEditRequest.getEmail() == null) {
+            notificationService.saveNotificationPreference(userId, false, null);
+        } else if (userEditRequest.getEmail() != null) {
+            notificationService.saveNotificationPreference(userId, true, userEditRequest.getEmail());
+        }
 
         user.setFirstName(userEditRequest.getFirstName());
         user.setLastName(userEditRequest.getLastName());
