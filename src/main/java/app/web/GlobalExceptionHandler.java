@@ -1,5 +1,6 @@
 package app.web;
 
+import app.exception.NotificationServiceFeignCallException;
 import app.exception.UsernameAlreadyExistException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,13 @@ public class GlobalExceptionHandler {
         return "redirect:/register";
     }
 
+    @ExceptionHandler(NotificationServiceFeignCallException.class)
+    public String handleNotificationFeignCallException(RedirectAttributes redirectAttributes, NotificationServiceFeignCallException exception) {
+
+        redirectAttributes.addFlashAttribute("notificationErrorMessage", exception.getMessage());
+        return "redirect:/notifications";
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({
             AccessDeniedException.class,
@@ -36,6 +44,7 @@ public class GlobalExceptionHandler {
         return new ModelAndView("not-found");
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ModelAndView handleAnyException(Exception exception) {
         ModelAndView modelAndView = new ModelAndView();

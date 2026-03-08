@@ -33,4 +33,15 @@ public interface NotificationClient {
 
     @GetMapping
     ResponseEntity<List<Notification>> getNotificationHistory(@RequestParam(name = "userId") UUID userId);
+
+    @DeleteMapping
+    ResponseEntity<Void> clearNotificationHistory(@RequestParam(name = "userId") UUID userId);
+
+    /**
+     * NOTE: This operation is conceptually a PATCH (partial update),
+     * but due to limitations in the Feign client setup, PATCH does not work.
+     * Using PUT here as a workaround.
+     */
+    @PutMapping
+    ResponseEntity<Void> retryFailedNotifications(@RequestParam(name = "userId") UUID userId);
 }

@@ -9,10 +9,7 @@ import app.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
@@ -58,4 +55,19 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 
+    @DeleteMapping
+    public String deleteNotificationHistory(@AuthenticationPrincipal AuthenticationMetadata authenticationMetadata) {
+
+        notificationService.clearNotificationHistory(authenticationMetadata.getUserId());
+
+        return "redirect:/notifications";
+    }
+
+    @PatchMapping
+    public String retryFailedNotifications(@AuthenticationPrincipal AuthenticationMetadata authenticationMetadata) {
+
+        notificationService.retryFailedNotifications(authenticationMetadata.getUserId());
+
+        return "redirect:/notifications";
+    }
 }

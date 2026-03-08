@@ -1,11 +1,13 @@
 package app.notification.service;
 
+import app.exception.NotificationServiceFeignCallException;
 import app.notification.client.NotificationClient;
 import app.notification.client.dto.Notification;
 import app.notification.client.dto.NotificationPreference;
 import app.notification.client.dto.NotificationRequest;
 import app.notification.client.dto.UpsertNotificationPreference;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,10 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class NotificationService {
+    @Value("${notification-svc.failure-message.clear-history}")
+    private String clearHistoryFailedMessage;
+    @Value("${notification-svc.failure-message.resend-notifications}")
+    private String resendNotificationsFailedMessage;
     private final NotificationClient notificationClient;
 
     public NotificationService(NotificationClient notificationClient) {
@@ -79,5 +85,25 @@ public class NotificationService {
         ResponseEntity<List<Notification>> response = notificationClient.getNotificationHistory(userId);
 
         return response.getBody();
+    }
+
+    public void clearNotificationHistory(UUID userId) {
+
+        try {
+            notificationClient.clearNotificationHistory(userId);
+        } catch (Exception e) {
+            log.error("Can't clear notification history for user with id = [%s].".formatted(userId));
+            throw new NotificationServiceFeignCallException(clearHistoryFailedMessage);
+        }
+    }
+
+    public void retryFailedNotifications(UUID userId) {
+
+        try {
+            notificationClient.retryFailedNotifications(userId);
+        } catch (Exception e) {
+            log.error("Can't resend notifications for user with id = [%s].".formatted(userId));
+            throw new NotificationServiceFeignCallException(resendNotificationsFailedMessage);
+        }
     }
 }
