@@ -17,6 +17,9 @@ import app.web.dto.RegisterRequest;
 import app.web.dto.UserEditRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,6 +56,31 @@ public class UserServiceUTest {
 
     @InjectMocks
     private UserService userService;
+
+    @ParameterizedTest
+    @MethodSource("userRolesArguments")
+    void whenSwitchRole_thenCorrectRoleIsAssigned(Role currentUserRole, Role expectedUserRole) {
+        // GIVEN
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .role(currentUserRole)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // WHEN
+        userService.switchRole(userId);
+
+        // THEN
+        assertEquals(expectedUserRole, user.getRole());
+    }
+
+    private static Stream<Arguments> userRolesArguments() {
+
+        return Stream.of(
+                Arguments.of(Role.USER, Role.ADMIN),
+                Arguments.of(Role.ADMIN, Role.USER)
+        );
+    }
 
     @Test
     void givenExistingUsersInDatabase_whenGetAllUsers_thenReturnThemAll() {
