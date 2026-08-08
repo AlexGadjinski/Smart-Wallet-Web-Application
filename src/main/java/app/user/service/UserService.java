@@ -75,9 +75,9 @@ public class UserService implements UserDetailsService {
     public void editUserDetails(UUID userId, UserEditRequest userEditRequest) {
         User user = getById(userId);
 
-        if (user.getEmail() != null && userEditRequest.getEmail() == null) {
+        if (user.getEmail() != null && userEditRequest.getEmail().isBlank()) {
             notificationService.saveNotificationPreference(userId, false, null);
-        } else if (userEditRequest.getEmail() != null) {
+        } else if (!userEditRequest.getEmail().isBlank()) {
             notificationService.saveNotificationPreference(userId, true, userEditRequest.getEmail());
         }
 
