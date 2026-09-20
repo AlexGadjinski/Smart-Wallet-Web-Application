@@ -2,7 +2,6 @@ package app.web;
 
 import app.exception.NotificationServiceFeignCallException;
 import app.exception.UsernameAlreadyExistException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,10 +16,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameAlreadyExistException.class)
-    public String handleUsernameAlreadyExist(RedirectAttributes redirectAttributes, HttpServletRequest request) {
+    public String handleUsernameAlreadyExist(RedirectAttributes redirectAttributes, UsernameAlreadyExistException exception) {
 
-        String username = request.getParameter("username");
-        String message = "%s is already in use!".formatted(username);
+        String message = exception.getMessage();
 
         redirectAttributes.addFlashAttribute("usernameAlreadyExistMessage", message);
         return "redirect:/register";
