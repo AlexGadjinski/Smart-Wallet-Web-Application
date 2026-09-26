@@ -13,6 +13,7 @@ import app.wallet.model.Wallet;
 import app.wallet.service.WalletService;
 import app.web.dto.RegisterRequest;
 import app.web.dto.UserEditRequest;
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -75,9 +76,9 @@ public class UserService implements UserDetailsService {
     public void editUserDetails(UUID userId, UserEditRequest userEditRequest) {
         User user = getById(userId);
 
-        if (user.getEmail() != null && userEditRequest.getEmail().isBlank()) {
+        if (user.getEmail() != null && StringUtils.isBlank(userEditRequest.getEmail())) {
             notificationService.saveNotificationPreference(userId, false, null);
-        } else if (!userEditRequest.getEmail().isBlank()) {
+        } else if (!StringUtils.isBlank(userEditRequest.getEmail())) {
             notificationService.saveNotificationPreference(userId, true, userEditRequest.getEmail());
         }
 
