@@ -36,9 +36,13 @@ public class NotificationService {
                 .contactInfo(email)
                 .build();
 
-        ResponseEntity<Void> response = notificationClient.upsertNotificationPreference(preference);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("[Feign call to notification-svc failed] Can't save user preference for user with id = [%s].".formatted(userId));
+        try {
+            ResponseEntity<Void> response = notificationClient.upsertNotificationPreference(preference);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("[Feign call to notification-svc failed] Can't save user preference for user with id = [%s].".formatted(userId));
+            }
+        } catch (Exception e) {
+            log.warn("Can't save notification preference for user with id = [%s] due to 500 Internal Server Error.".formatted(userId));
         }
     }
 
